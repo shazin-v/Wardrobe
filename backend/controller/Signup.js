@@ -4,6 +4,12 @@ const bcrypt = require("bcryptjs");
 async function userRegister(req, res) {
   try {
     const { email, password, name } = req.body;
+
+    const user = await userModel.findOne({ email: email });
+    if (user) {
+      throw new Error("user already exist");
+    }
+
     if (!email) {
       throw new Error("please provide an email");
     }
@@ -23,6 +29,7 @@ async function userRegister(req, res) {
 
     const payload = {
       ...req.body,
+      role: "GENERAL",
       password: hashPassword,
     };
     console.log("payload");
@@ -38,8 +45,7 @@ async function userRegister(req, res) {
     });
   } catch (error) {
     res.json({
-      message: "error in signup controoler",
-      error,
+      message: error || error.message,
       error: true,
       success: false,
     });
